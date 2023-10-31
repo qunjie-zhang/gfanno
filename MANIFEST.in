@@ -1,0 +1,2 @@
+include gfanno/dataset/hmm/*.hmm
+include gfanno/dataset/seed/*.fasta
