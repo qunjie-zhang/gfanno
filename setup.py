@@ -1,7 +1,8 @@
 # -*- coding:utf-8 -*-
 from setuptools import setup
 from setuptools import find_packages
-import os
+from gfanno.__main__ import __VERSION__
+
 
 def readme():
     with open('README.md', encoding='utf-8') as f:
@@ -10,7 +11,7 @@ def readme():
 
 setup(
     name='gfanno',
-    version='1.0',
+    version=__VERSION__,
     description='Gene Family Annotation',
     long_description=readme(),  # 长文描述
     long_description_content_type='text/markdown',  # 长文描述的文本格式

@@ -2,18 +2,18 @@ import getopt
 import os
 import shutil
 import sys
-
+import time
 from .GeneFamilyAnno import GeneFamilyAnno
 from .utils.config import config
 from .utils.fasta import Fasta
 from .utils.log import Log
 
-VERSION = '1.00'
 
+__VERSION__ = '1.1'
 
 def help_command():
     msg = f'''Program:    gfanno (Gene Family Annoation Workflow)
-Version:    {VERSION}
+Version:    {__VERSION__}
 
     Useage: gfanno  <command> [options]
 
@@ -34,7 +34,7 @@ Version:    {VERSION}
 
 
 def version_command():
-    msg = f'''gfanno {VERSION}\nCopyright (C) 2023 Bioinformatics Laboratory of South China Agricultural University.'''
+    msg = f'''gfanno {__VERSION__}\nCopyright (C) 2023 Bioinformatics Laboratory of South China Agricultural University.'''
     print(msg)
     exit()
 
@@ -65,19 +65,24 @@ def generate_config_command():
 
 # 输出 stat 文件
 def write_state(path, fasta_path, config_info, filter_res):
-    table_header = '# Target_ID\t\tBlastp_identity\tBlastp_qcovs\tBlastp_tcovs\t' + '\t'.join(
+    table_header = '# Target_ID\t\tb_iden\tb_qcov\tb_tcovs\t' + '\t'.join(
         [i + '_coverage' for i in config_info['domain'].split(',')])
     with open(path, 'w', encoding='utf8') as state_file:
         state_file.write('# Gfanno state output\n')
         state_file.write('# -----------------------\n')
+        state_file.write(f"# Date:{time.asctime()}\n")
         state_file.write(f"# Fasta:{os.path.basename(fasta_path)}\n")
         state_file.write(f"# Seed:{os.path.basename(config_info['blastp_seed'])}\n")
         state_file.write(f"# Hmm model:{config_info['hmm']}\n")
         state_file.write(f"# Domain:{os.path.basename(config_info['domain'])}\n")
+        state_file.write(f"# b_iden:{config_info['b_iden']}\n")
+        state_file.write(f"# b_qcov:{config_info['b_qcov']}\n")
+        state_file.write(f"# b_tcov_limit: {config_info['b_tcov_min']}--{config_info['b_tcov_max']}\n")
+        state_file.write(f"# h_cov:{config_info['h_cov']}\n")
         state_file.write('\n' + table_header + '\n')
         for id, value in filter_res.items():
             state_file.write(
-                f"{id}\t{round(float(value['identity']))}\t{round(float(value['blastp_qcovs']))}\t{round(float(value['blastp_tcovs']))}\t" + '\t'.join(
+                f"{id}\t{round(float(value['identity']))}\t{round(float(value['b_qcov']))}\t{round(float(value['b_tcovs']))}\t" + '\t'.join(
                     [str(round(float(value['domain'][i]))) for i in config_info['domain'].split(',')]) + '\n')
 
 
@@ -191,7 +196,7 @@ def main():
             log.debug(f'Target info: {target_info}')
 
         # target_info
-        #  {'blastp_seed': 'seed/4CL.seed.fasta', 'hmm': 'hmm/AMP-binding_C.hmm', 'domain': 'AMP-binding_C', 'blastp_identity': '50', 'blastp_qcovs': '50', 'hmm_coverage': '50'}
+        #  {'blastp_seed': 'seed/4CL.seed.fasta', 'hmm': 'hmm/AMP-binding_C.hmm', 'domain': 'AMP-binding_C', 'b_iden': '50', 'b_qcov': '50', 'h_cov': '50'}
 
         # 输出路径的子目录名称
         sub_prefix = os.path.basename(fasta_path).split(',')[0] + '_' + target_name
@@ -215,28 +220,31 @@ def main():
         hmmout_path = workflow_res['hmm_out']
         blastpout_path = workflow_res['blastp_out']
 
-        # 处理传入多个domain域 与 hmm_coverage 值
+        # 处理传入多个domain域 与 h_cov 值
         domain_list = target_info['domain'].split(',')
-        hmm_coverage = target_info['hmm_coverage'].split(',')
+        h_cov = target_info['h_cov'].split(',')
 
-        blastp_identity = float(target_info['blastp_identity'])
-        blastp_qcovs = float(target_info['blastp_qcovs'])
+        b_iden = float(target_info['b_iden'])
+        b_qcov = float(target_info['b_qcov'])
+        
+        b_tcov_max = float(target_info['b_tcov_max'])
+        b_tcov_min = float(target_info['b_tcov_min'])
 
         # # 在检查配置文件时检查该项目
-        # if len(domain) != len(hmm_coverage):
-        #     exit('Domain 数量 与 hmm_coverage 参数数量不一致！')
+        # if len(domain) != len(h_cov):
+        #     exit('Domain 数量 与 h_cov 参数数量不一致！')
 
-        # domain域：hmm_coverage值
+        # domain域：h_cov值
         domain_coverage = dict()
 
         if DEBUG:
             log.debug(f'domain_list: {domain_list}')
-            log.debug(f'hmm_coverage: {hmm_coverage}')
+            log.debug(f'h_cov: {h_cov}')
 
-        for d, p in zip(domain_list, hmm_coverage):
+        for d, p in zip(domain_list, h_cov):
             domain_coverage[d] = float(p)
         if DEBUG:
-            log.debug(f'Domain <-> hmm_coverage: {domain_coverage}')
+            log.debug(f'Domain <-> h_cov: {domain_coverage}')
 
         # hmm file
         # {'TGY|GWHPASIV043514': {'domain': {'Prenyltrans': 93.18, 'SQHop_cyclase_C': 99.06, 'SQHop_cyclase_N': 90.72}}
@@ -250,30 +258,30 @@ def main():
                 if line.startswith('#'): continue
                 line = line.split()
 
-                line_hmm_coverage_compute = round(((float(line[16]) - float(line[15])) / float(line[5])) * 100,
+                line_h_cov_compute = round(((float(line[16]) - float(line[15])) / float(line[5])) * 100,
                                                   2)  # 保留两位小数
                 line_domain = line[3]
                 line_evalue = float(line[6])
 
                 if DEBUG:
                     log.debug(
-                        f'HMM_COVERAGE: {line_domain} SET:{domain_coverage[line_domain]}  COMPUTE:{line_hmm_coverage_compute}')
+                        f'h_cov: {line_domain} SET:{domain_coverage[line_domain]}  COMPUTE:{line_h_cov_compute}')
 
-                if line_domain in domain_coverage and line_hmm_coverage_compute > domain_coverage[
+                if line_domain in domain_coverage and line_h_cov_compute > domain_coverage[
                     line_domain] and line_evalue < 1E-10:
                     # 当前 ID 不在列表中
                     if line[0] not in hmm_file_filter_dict:
                         hmm_file_filter_dict[line[0]] = {
                             'domain': {
-                                line_domain: line_hmm_coverage_compute
+                                line_domain: line_h_cov_compute
                             }
                         }
                     else:
                         # 当前 ID 已在列表中
                         #  如果当前 domain 不存在 或 已存在值小于目标 则进行更新操作
                         if line_domain not in hmm_file_filter_dict[line[0]]['domain'] or \
-                                hmm_file_filter_dict[line[0]]['domain'][line_domain] < line_hmm_coverage_compute:
-                            hmm_file_filter_dict[line[0]]['domain'][line_domain] = line_hmm_coverage_compute
+                                hmm_file_filter_dict[line[0]]['domain'][line_domain] < line_h_cov_compute:
+                            hmm_file_filter_dict[line[0]]['domain'][line_domain] = line_h_cov_compute
 
         if DEBUG:
             log.debug(f'hmm_file_filter_dict 1: {hmm_file_filter_dict}')
@@ -294,65 +302,74 @@ def main():
         seed_dict = fa.load_dict(target_info['blastp_seed'])
 
         # blastpout_file_filter_dict()
-        # {id:{identity,blastp_qcovs}}
+        # {id:{identity,b_qcov}}
 
         blastpout_file_filter_dict = dict()
 
         with open(blastpout_path, 'r', encoding='utf8') as blastpout_file:
             blastpout_file = blastpout_file.read().splitlines()
             for line in blastpout_file:
+                # 部分场景下 blastp 输出警告信息
+                if line.startswith('Warning'):
+                    continue
                 line = line.split()
+                # 部分场景下 blastp 输出内容异常
+                if len(line) != 13:continue
 
                 line_id = line[0]
                 seed_id = line[1]
-                line_blastp_identity = float(line[2])
+                line_b_iden = float(line[2])
                 line_evalue = float(line[10])
-                line_blastp_qcovs = float(line[12])
-                line_blastp_tcovs = int(float(line_blastp_qcovs) * len(fasta_dict[line_id]) / len(seed_dict[seed_id]))
-                # 设置上限100
-                if line_blastp_tcovs > 100: line_blastp_tcovs = 100
+                line_b_qcov = float(line[12])
+                line_b_tcovs = int(float(line_b_qcov) * len(fasta_dict[line_id]) / len(seed_dict[seed_id]))
 
-                if line_evalue < 1E-10 and line_blastp_identity >= blastp_identity and line_blastp_qcovs > blastp_qcovs:
+                
+                # b_tcov limit
+                if line_b_tcovs > b_tcov_max: line_b_tcovs = b_tcov_min
+                if line_b_tcovs < b_tcov_min: line_b_tcovs = b_tcov_min
+
+                if line_evalue < 1E-10 and line_b_iden >= b_iden and line_b_qcov > b_qcov:
                     # 当前 ID 不存在该列表
                     if line_id not in blastpout_file_filter_dict:
                         blastpout_file_filter_dict[line_id] = {
-                            'identity': line_blastp_identity,
-                            'blastp_qcovs': line_blastp_qcovs,
-                            'blastp_tcovs': line_blastp_tcovs
+                            'identity': line_b_iden,
+                            'b_qcov': line_b_qcov,
+                            'b_tcovs': line_b_tcovs
                         }
                     else:
                         # # 如果已存在则进行判断后决定是否替换
                         # # 每个值均为独立不关联状态
-                        # if blastpout_file_filter_dict[line_id]['identity'] < line_blastp_identity:
-                        #     blastpout_file_filter_dict[line_id]['identity'] = line_blastp_identity
-                        # if blastpout_file_filter_dict[line_id]['blastp_qcovs'] < line_blastp_qcovs:
-                        #     blastpout_file_filter_dict['blastp_qcovs'] = line_blastp_qcovs
-                        # if blastpout_file_filter_dict[line_id]['blastp_tcovs'] < line_blastp_tcovs:
-                        #     blastpout_file_filter_dict[line_id]['blastp_tcovs'] = line_blastp_tcovs
+                        # if blastpout_file_filter_dict[line_id]['identity'] < line_b_iden:
+                        #     blastpout_file_filter_dict[line_id]['identity'] = line_b_iden
+                        # if blastpout_file_filter_dict[line_id]['b_qcov'] < line_b_qcov:
+                        #     blastpout_file_filter_dict['b_qcov'] = line_b_qcov
+                        # if blastpout_file_filter_dict[line_id]['b_tcovs'] < line_b_tcovs:
+                        #     blastpout_file_filter_dict[line_id]['b_tcovs'] = line_b_tcovs
 
                         # 如果已存在则进行判断后决定是否替换
                         # 取Blastp最大值那一行
-                        if blastpout_file_filter_dict[line_id]['identity'] < line_blastp_identity:
-                            blastpout_file_filter_dict[line_id]['identity'] = line_blastp_identity
-                            blastpout_file_filter_dict['blastp_qcovs'] = line_blastp_qcovs
-                            blastpout_file_filter_dict[line_id]['blastp_tcovs'] = line_blastp_tcovs
+                        # 如果记录值小于当前行，则进行替换操作
+                        if blastpout_file_filter_dict[line_id]['identity'] < line_b_iden:
+                            blastpout_file_filter_dict[line_id]['identity'] = line_b_iden
+                            blastpout_file_filter_dict['b_qcov'] = line_b_qcov
+                            blastpout_file_filter_dict[line_id]['b_tcovs'] = line_b_tcovs
 
-            #     if line_evalue < 1E-10 and line_blastp_identity >= blastp_identity and line_blastp_qcovs > blastp_qcovs:
+            #     if line_evalue < 1E-10 and line_b_iden >= b_iden and line_b_qcov > b_qcov:
             #         # 当前 ID 不存在该列表
             #         if line_id not in blastpout_file_filter_dict:
             #             blastpout_file_filter_dict[line_id] = list()
             #             blastpout_file_filter_dict[line_id].append({
-            #                 'identity': line_blastp_identity,
-            #                 'blastp_qcovs': line_blastp_qcovs,
-            #                 'blastp_tcovs': line_blastp_tcovs,
-            #                 #  当传入多个hmm模型时则会出现多个hmm_coverage值，此处取出现的最小值用于后续排序
+            #                 'identity': line_b_iden,
+            #                 'b_qcov': line_b_qcov,
+            #                 'b_tcovs': line_b_tcovs,
+            #                 #  当传入多个hmm模型时则会出现多个h_cov值，此处取出现的最小值用于后续排序
             #                 # 'hmm_low_coverage':min([y for x,y in hmm_file_filter_dict[line_id]['domain'].items()])
             #             })
             #         else:
             #             blastpout_file_filter_dict[line_id].append({
-            #                 'identity': line_blastp_identity,
-            #                 'blastp_qcovs': line_blastp_qcovs,
-            #                 'blastp_tcovs': line_blastp_tcovs,
+            #                 'identity': line_b_iden,
+            #                 'b_qcov': line_b_qcov,
+            #                 'b_tcovs': line_b_tcovs,
             #                 # 'hmm_low_coverage': min([y for x, y in hmm_file_filter_dict[line_id]['domain'].items()])
             #             })
             #
@@ -364,19 +381,19 @@ def main():
         # print(blastpout_file_filter_dict)
 
         # {'TGY|GWHPASIV043514': {'domain': {'Prenyltrans': 93.18, 'SQHop_cyclase_C': 99.06, 'SQHop_cyclase_N': 90.72}}, 'TGY|GWHPASIV031780': {'domain': {'Prenyltrans': 90.91, 'SQHop_cyclase_C': 98.43, 'SQHop_cyclase_N': 96.91}}}
-        # {'TGY|GWHPASIV009143': {'identity': 94.751, 'blastp_qcovs': 100.0}, 'TGY|GWHPASIV015605': {'identity': 95.333, 'blastp_qcovs': 100.0}, 'TGY|GWHPASIV031776': {'identity': 100.0, 'blastp_qcovs': 100.0}, 'TGY|GWHPASIV031777': {'identity': 94.882, 'blastp_qcovs': 99.0}, 'TGY|GWHPASIV031780': {'identity': 96.133, 'blastp_qcovs': 100.0}}
+        # {'TGY|GWHPASIV009143': {'identity': 94.751, 'b_qcov': 100.0}, 'TGY|GWHPASIV015605': {'identity': 95.333, 'b_qcov': 100.0}, 'TGY|GWHPASIV031776': {'identity': 100.0, 'b_qcov': 100.0}, 'TGY|GWHPASIV031777': {'identity': 94.882, 'b_qcov': 99.0}, 'TGY|GWHPASIV031780': {'identity': 96.133, 'b_qcov': 100.0}}
 
         filter_res = dict()
         for hmm_id in hmm_file_filter_dict:
             if hmm_id in blastpout_file_filter_dict:
                 filter_res[hmm_id] = {
                     'identity': blastpout_file_filter_dict[hmm_id]['identity'],
-                    'blastp_qcovs': blastpout_file_filter_dict[hmm_id]['blastp_qcovs'],
-                    'blastp_tcovs': blastpout_file_filter_dict[hmm_id]['blastp_tcovs'],
+                    'b_qcov': blastpout_file_filter_dict[hmm_id]['b_qcov'],
+                    'b_tcovs': blastpout_file_filter_dict[hmm_id]['b_tcovs'],
                     'domain': hmm_file_filter_dict[hmm_id]['domain']
                 }
 
-        # filter_res =   {'TGY|GWHPASIV025623': {'identity': 65.587, 'blastp_qcovs': 99.0, 'domain': {'PPO1_DWL': 98.08, 'PPO1_KFDV': 99.23}}, 'TGY|GWHPASIV025620': {'identity': 61.497, 'blastp_qcovs': 94.0, 'domain': {'PPO1_DWL': 98.08, 'PPO1_KFDV': 99.23}}, 'TGY|GWHPASIV026886': {'identity': 74.769, 'blastp_qcovs': 73.0, 'domain': {'PPO1_DWL': 96.15, 'PPO1_KFDV': 98.46}}}
+        # filter_res =   {'TGY|GWHPASIV025623': {'identity': 65.587, 'b_qcov': 99.0, 'domain': {'PPO1_DWL': 98.08, 'PPO1_KFDV': 99.23}}, 'TGY|GWHPASIV025620': {'identity': 61.497, 'b_qcov': 94.0, 'domain': {'PPO1_DWL': 98.08, 'PPO1_KFDV': 99.23}}, 'TGY|GWHPASIV026886': {'identity': 74.769, 'b_qcov': 73.0, 'domain': {'PPO1_DWL': 96.15, 'PPO1_KFDV': 98.46}}}
 
         write_state(path=os.path.join(OUTPUT_DIR, sub_prefix + '.stat'), fasta_path=fasta_path, config_info=target_info,
                     filter_res=filter_res)

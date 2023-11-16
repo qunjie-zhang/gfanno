@@ -79,6 +79,7 @@ You can create multiple configuration files to use with the software by using th
 
 This is a demonstration scenario from the default configuration file:
 ```ini
+# PPO
 [PPO]
 blastp_seed = seed/PPO.seed.fasta
 hmm = hmm/PPO1_DWL.hmm,hmm/PPO1_KFDV.hmm
@@ -89,6 +90,7 @@ blastp_qcovs = 50
 ```
 In the configuration file, the hmm parameter, hmm_coverage parameter, and domain parameter can have multiple values separated by commas. However, it is important to note that the number of values they carry must be equal.
 
+The configuration file supports comment text information starting with ‘;’ or ‘#’
 
 ## LICENSE
 Copyright [2023] [Bioinformatics Laboratory of South China Agricultural University]
