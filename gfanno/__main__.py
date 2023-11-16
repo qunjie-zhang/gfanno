@@ -9,7 +9,7 @@ from .utils.fasta import Fasta
 from .utils.log import Log
 
 
-__VERSION__ = '1.1'
+__VERSION__ = '1.2'
 
 def help_command():
     msg = f'''Program:    gfanno (Gene Family Annoation Workflow)
@@ -309,20 +309,24 @@ def main():
         with open(blastpout_path, 'r', encoding='utf8') as blastpout_file:
             blastpout_file = blastpout_file.read().splitlines()
             for line in blastpout_file:
-                # 部分场景下 blastp 输出警告信息
-                if line.startswith('Warning'):
-                    continue
+
+                # 对blastp输出信息进行过滤，剔除容易造成错误的数据
+                if line.startswith('Warning'):continue
+                if line.startswith('FASTA-Reader'):continue
                 line = line.split()
-                # 部分场景下 blastp 输出内容异常
                 if len(line) != 13:continue
 
                 line_id = line[0]
                 seed_id = line[1]
-                line_b_iden = float(line[2])
-                line_evalue = float(line[10])
-                line_b_qcov = float(line[12])
-                line_b_tcovs = int(float(line_b_qcov) * len(fasta_dict[line_id]) / len(seed_dict[seed_id]))
-
+                try:
+                    line_b_iden = float(line[2])
+                    line_evalue = float(line[10])
+                    line_b_qcov = float(line[12])
+                    line_b_tcovs = int(float(line_b_qcov) * len(fasta_dict[line_id]) / len(seed_dict[seed_id]))
+                except:
+                    log.error_info('Type conversion error: There is abnormal information in the blast output file')
+                    print(line)
+                    exit(1)
                 
                 # b_tcov limit
                 if line_b_tcovs > b_tcov_max: line_b_tcovs = b_tcov_min
