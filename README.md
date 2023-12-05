@@ -41,6 +41,19 @@ cd gfanno
 python setup.py install
 ```
 
+## Quick Start
+```shell
+# Generate basic configuration file.
+gfanno -g
+# Release sample data, including HMM models and seed files.
+gfanno --data
+
+# Enter the fasta file path you need to use after the - f parameter
+# This example uses a seed file. In actual use, the seed file is not passed in here.
+gfanno -f seed/4CL.seed.fasta
+
+```
+
 ## Usage
 ### Get Help Information
 Use it as a terminal command. For all parameters, type `gfanno -h`.
