@@ -19,67 +19,213 @@ class config:
     def config_init(self):
 
         self.cfg['4CL'] = {
-            'blastp_seed': "seed/4CL.seed.fasta",
-            'hmm': "hmm/AMP-binding_C.hmm",
-            'domain': "AMP-binding_C",
-            'b_iden': '50',
-            'b_qcov': '50',
-            'b_tcov_max': '100',
-            'b_tcov_min': '0',
-            'h_cov': '50',
+            'blastp_seed': 'seed/4CL.seed.fasta',
+            'hmm': 'hmm/AMP-binding_C.hmm,hmm/AMP-binding.hmm',
+            'domain': 'AMP-binding_C,AMP-binding',
+            'b_iden': '40',
+            'b_tcov_max': '120',
+            'b_tcov_min': '60',
+            'b_qcov': '70',
+            'h_cov': '90,90'
         }
-        self.cfg['C4H'] = {
-            'blastp_seed': "seed/C4H.seed.fasta",
-            'hmm': "hmm/cspCYP450.hmm",
-            'domain': "cspCYP450",
-            'b_iden': '60',
-            'b_qcov': '50',
-            'b_tcov_max': '100',
-            'b_tcov_min': '0',
-            'h_cov': '60',
-        }
-        self.cfg['CHI'] = {
-            'blastp_seed': "seed/CHI.seed.fasta",
-            'hmm': "hmm/Chalcone.hmm",
-            'domain': "Chalcone",
-            'b_iden': '50',
-            'b_qcov': '50',
-            'b_tcov_max': '100',
-            'b_tcov_min': '0',
-            'h_cov': '60',
-        }
+
         self.cfg['CHS'] = {
-            'blastp_seed': "seed/CHS.seed.fasta",
-            'hmm': "hmm/Chal_sti_synt_C.hmm",
-            'domain': "Chal_sti_synt_C",
+            'blastp_seed': 'seed/CHS.seed.fasta',
+            'hmm': 'hmm/Chal_sti_synt_C.hmm,hmm/Chal_sti_synt_N.hmm',
+            'domain': 'Chal_sti_synt_C,Chal_sti_synt_N',
             'b_iden': '50',
-            'b_qcov': '50',
-            'b_tcov_max': '100',
-            'b_tcov_min': '0',
-            'h_cov': '60',
+            'b_tcov_max': '120',
+            'b_tcov_min': '80',
+            'b_qcov': '80',
+            'h_cov': '90,90'
         }
 
         self.cfg['PPO'] = {
-            'blastp_seed': "seed/PPO.seed.fasta",
-            'hmm': "hmm/PPO1_DWL.hmm,hmm/PPO1_KFDV.hmm",
-            'domain': "PPO1_KFDV,PPO1_DWL",
-            'b_iden': '50',
-            'b_qcov': '50',
-            'b_tcov_max': '100',
-            'b_tcov_min': '0',
-            'h_cov': '70,70',
-        }
-        self.cfg['SCPL1A'] = {
-            'blastp_seed': "seed/SCPL1A.seed.fasta",
-            'hmm': "hmm/Peptidase_S10.hmm",
-            'domain': "Peptidase_S10",
-            'b_iden': '40',
-            'b_tcov_max': '100',
-            'b_tcov_min': '0',
-            'b_qcov': '50',
-            'h_cov': '70',
+            'blastp_seed': 'seed/PPO.seed.fasta',
+            'hmm': 'hmm/PPO1_DWL.hmm,hmm/PPO1_KFDV.hmm',
+            'domain': 'PPO1_DWL,PPO1_KFDV',
+            'b_iden': '35',
+            'b_tcov_max': '130',
+            'b_tcov_min': '70',
+            'b_qcov': '70',
+            'h_cov': '90,90'
         }
 
+        self.cfg['C4H'] = {
+            'blastp_seed': 'seed/C4H.seed.fasta',
+            'hmm': 'hmm/p450.hmm',
+            'domain': 'p450',
+            'b_iden': '70',
+            'b_tcov_max': '120',
+            'b_tcov_min': '80',
+            'b_qcov': '80',
+            'h_cov': '90'
+        }
+
+        self.cfg['CHI'] = {
+            'blastp_seed': 'seed/CHI.seed.fasta',
+            'hmm': 'hmm/Chalcone.hmm',
+            'domain': 'Chalcone',
+            'b_iden': '35',
+            'b_tcov_max': '130',
+            'b_tcov_min': '70',
+            'b_qcov': '70',
+            'h_cov': '90'
+        }
+
+        self.cfg['DFR'] = {
+            'blastp_seed': 'seed/DFR.seed.fasta',
+            'hmm': 'hmm/Epimerase.hmm',
+            'domain': 'Epimerase',
+            'b_iden': '60',
+            'b_tcov_max': '120',
+            'b_tcov_min': '80',
+            'b_qcov': '80',
+            'h_cov': '90'
+        }
+
+        self.cfg['ANR'] = {
+            'blastp_seed': 'seed/ANR.seed.fasta',
+            'hmm': 'hmm/Epimerase.hmm',
+            'domain': 'Epimerase',
+            'b_iden': '55',
+            'b_tcov_max': '120',
+            'b_tcov_min': '80',
+            'b_qcov': '80',
+            'h_cov': '90'
+        }
+
+        self.cfg['ANS'] = {
+            'blastp_seed': 'seed/ANS.seed.fasta',
+            'hmm': 'hmm/2OG-FeII_Oxy.hmm,hmm/DIOX_N.hmm',
+            'domain': '2OG-FeII_Oxy,DIOX_N',
+            'b_iden': '60',
+            'b_tcov_max': '120',
+            'b_tcov_min': '80',
+            'b_qcov': '80',
+            'h_cov': '90,90'
+        }
+
+        self.cfg['F33H'] = {
+            'blastp_seed': 'seed/F33H.seed.fasta',
+            'hmm': 'hmm/p450.hmm',
+            'domain': 'p450',
+            'b_iden': '60',
+            'b_tcov_max': '120',
+            'b_tcov_min': '80',
+            'b_qcov': '80',
+            'h_cov': '90'
+        }
+
+        self.cfg['F3H'] = {
+            'blastp_seed': 'seed/F3H.seed.fasta',
+            'hmm': 'hmm/2OG-FeII_Oxy.hmm,hmm/DIOX_N.hmm',
+            'domain': '2OG-FeII_Oxy,DIOX_N',
+            'b_iden': '60',
+            'b_tcov_max': '120',
+            'b_tcov_min': '80',
+            'b_qcov': '80',
+            'h_cov': '90,90'
+        }
+
+        self.cfg['F35H'] = {
+            'blastp_seed': 'seed/F35H.seed.fasta',
+            'hmm': 'hmm/p450.hmm',
+            'domain': 'p450',
+            'b_iden': '60',
+            'b_tcov_max': '120',
+            'b_tcov_min': '80',
+            'b_qcov': '80',
+            'h_cov': '90'
+        }
+
+        self.cfg['FLS'] = {
+            'blastp_seed': 'seed/FLS.seed.fasta',
+            'hmm': 'hmm/2OG-FeII_Oxy.hmm,hmm/DIOX_N.hmm',
+            'domain': '2OG-FeII_Oxy,DIOX_N',
+            'b_iden': '60',
+            'b_tcov_max': '120',
+            'b_tcov_min': '80',
+            'b_qcov': '80',
+            'h_cov': '90,90'
+        }
+
+        self.cfg['FNSII'] = {
+            'blastp_seed': 'seed/FNSII.seed.fasta',
+            'hmm': 'hmm/p450.hmm',
+            'domain': 'p450',
+            'b_iden': '55',
+            'b_tcov_max': '120',
+            'b_tcov_min': '80',
+            'b_qcov': '80',
+            'h_cov': '90'
+        }
+
+        self.cfg['LAR'] = {
+            'blastp_seed': 'seed/LAR.seed.fasta',
+            'hmm': 'hmm/NmrA.hmm',
+            'domain': 'NmrA',
+            'b_iden': '30',
+            'b_tcov_max': '120',
+            'b_tcov_min': '80',
+            'b_qcov': '65',
+            'h_cov': '90'
+        }
+
+        self.cfg['PAL'] = {
+            'blastp_seed': 'seed/PAL.seed.fasta',
+            'hmm': 'hmm/Lyase_aromatic.hmm',
+            'domain': 'Lyase_aromatic',
+            'b_iden': '60',
+            'b_tcov_max': '120',
+            'b_tcov_min': '80',
+            'b_qcov': '80',
+            'h_cov': '90'
+        }
+
+        self.cfg['SCPL4'] = {
+            'blastp_seed': 'seed/SCPL4.seed.fasta',
+            'hmm': 'hmm/Peptidase_S10.hmm',
+            'domain': 'Peptidase_S10',
+            'b_iden': '70',
+            'b_tcov_max': '120',
+            'b_tcov_min': '80',
+            'b_qcov': '80',
+            'h_cov': '90'
+        }
+
+        self.cfg['SCPL5'] = {
+            'blastp_seed': 'seed/SCPL5.seed.fasta',
+            'hmm': 'hmm/Peptidase_S10.hmm',
+            'domain': 'Peptidase_S10',
+            'b_iden': '70',
+            'b_tcov_max': '120',
+            'b_tcov_min': '80',
+            'b_qcov': '80',
+            'h_cov': '90'
+        }
+
+        self.cfg['UGT84A'] = {
+            'blastp_seed': 'seed/UGT84A.seed.fasta',
+            'hmm': 'hmm/UGTnew.hmm',
+            'domain': 'UGT',
+            'b_iden': '40',
+            'b_tcov_max': '120',
+            'b_tcov_min': '80',
+            'b_qcov': '80',
+            'h_cov': '90'
+        }
+
+        self.cfg['LDOX'] = {
+            'blastp_seed': 'seed/LDOX.seed.fasta',
+            'hmm': 'hmm/2OG-FeII_Oxy.hmm,hmm/DIOX_N.hmm',
+            'domain': '2OG-FeII_Oxy,DIOX_N',
+            'b_iden': '55',
+            'b_tcov_max': '120',
+            'b_tcov_min': '80',
+            'b_qcov': '80',
+            'h_cov': '90,90'
+        }
 
         with open(self.filename, 'w',encoding='utf8') as configfile:
             configfile.write(';This configuration files used by Gfanno\n;You can refer to the configuration method in the sample file to add the configuration you need.\n\n')
