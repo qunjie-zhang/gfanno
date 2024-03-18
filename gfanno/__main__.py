@@ -9,7 +9,7 @@ from .utils.fasta import Fasta
 from .utils.log import Log
 
 
-__VERSION__ = '1.2'
+__VERSION__ = '1.3'
 
 def help_command():
     msg = f'''Program:    gfanno (Gene Family Annoation Workflow)
