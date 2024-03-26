@@ -45,8 +45,7 @@ class GeneFamilyAnno:
             hmmout_part_name = os.path.join(PROJECT_DIR, str(idx)+'.hmmout.part')
             hmmout_part_list.append(hmmout_part_name)
             # log.info(msg=f'Start hmmsearch [{hmm}]')
-            res = cmd.run(
-                f'hmmsearch --cpu {CPU_COUNT} --domtblout {hmmout_part_name} {hmm} {fasta_path}',record=self.debug)
+            res = cmd.run(f'hmmsearch --cpu {CPU_COUNT} --domtblout {hmmout_part_name} {hmm} {fasta_path}',record=self.debug)
 
         # log.info(msg='Merge hmmout files ...')
         with open(HMMSEARCH_PATH,'w',encoding='utf8') as hmm_merge:

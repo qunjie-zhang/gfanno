@@ -29,7 +29,7 @@ hmmsearch -h
 python >= 3.5
 
 ### Install Gfanno
-There are several ways to run gfanno
+There are multiple ways to install gfanno software here.Just choose one of the methods.
 - Installing using pypi
 ```shell
 pip install gfanno
@@ -47,35 +47,37 @@ python setup.py install
 gfanno -g
 # Release sample data, including HMM models and seed files.
 gfanno --data
-
 # Enter the fasta file path you need to use after the - f parameter
 # This example uses a seed file. In actual use, the seed file is not passed in here.
-gfanno -f seed/4CL.seed.fasta
-
+gfanno -f test.fasta
 ```
 
 ## Usage
 ### Get Help Information
 Use it as a terminal command. For all parameters, type `gfanno -h`.
 ```shell
+
 Program:    gfanno (Gene Family Annoation Workflow)
-Version:    1.00
+Version:    1.4
 
     Useage: gfanno  <command> [options]
 
     Commands:
-        -f / --fasta    Input fasta file path. This option is required.
-        -o / --output   Output file path.
-        -c / --config   Use the specified configuration file. This parameter is optional.
-                        If you do not set this parameter, the program will use 'gfanno_config.ini' by default.
-        -t / --target   Specifies the parameter category used in the configuration file. This option is required.
-        -g / --generate Generate the default configuration file (gfanno_config.ini) under the current path.
-                        Used to initialize the software operating environment or reset damaged configuration files
-        -- / --data     Release built-in data sets in the current directory.
-        -h / --help     Display this help message.
-        -v / --version  Detailed version information
+        -f / --fasta        Input fasta file path. This option is required.
+        -- / --deredundant  To de-redundant the annotation results of different subfamilies.
+                            Enter at least two gfanno output stat files path,Suppy ort - o parameter to specifoutput name.
+        -o / --output       Output file path.
+        -c / --config       Use the specified configuration file. This parameter is optional. 
+                            If you do not set this parameter, the program will use 'gfanno_config.ini' by default.
+        -t / --target       Specifies the parameter category used in the configuration file. This option is required.
+        -g / --generate     Generate the default configuration file (gfanno_config.ini) under the current path.
+                            Used to initialize the software operating environment or reset damaged configuration files.
+        -- / --data         Release built-in data sets in the current directory.
+        -h / --help         Display this help message.
+        -v / --version      Detailed version information.
 ``` 
 * `-f` is the input fasta file path,is a required parameter. 
+* `--deredundant` The function of merge is to de-redundant the annotation results of different subfamilies with the same domain in a gene family or supergene family, with the goal of eventually annotating the gene into a more correct subfamily and avoiding incorrect annotation.
 * `-o` is the data output path. If the path does not exist, the program will automatically create it. The default is `output`
 * `-c` This parameter is used to specify the path of the configuration file. By default, the configuration file is located in the current directory and is named `gfanno_config.ini`. In this case, you do not need to specify this parameter, as the program will use this file by default. If your configuration file has a different name or path, or if you want to use a specific configuration file, please use this parameter to inform the program about the configuration file you want to use.
 * `-t` This is an optional parameter used to specify the parameter schemes used during software runtime. In the configuration file, you can define multiple runtime schemes. You can use this parameter to specify the names of the runtime schemes, allowing you to input multiple names separated by commas. If this parameter is not specified, all the schemes provided in the configuration file will be used by default.
